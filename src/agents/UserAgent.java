@@ -1,6 +1,9 @@
 package agents;
 
 import jade.core.Agent;
+
+import java.util.Scanner;
+
 import jade.core.AID;
 import jade.core.behaviours.WakerBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -28,11 +31,36 @@ public class UserAgent extends Agent {
                     System.out.println("Servicio recommendation-service encontrado en: "
                             + recommender.getLocalName());
 
+                    //Interaccion con usuario
+                    System.out.println("Bienvenido al Planificador de estudio");
+
+                    Scanner sc = new Scanner(System.in);
+
+                    System.out.print("¿Cuántos días faltan para el examen?: ");
+                    int dias = sc.nextInt();
+
+                    System.out.print("¿Cuántas horas al dia puedes estudiar?: ");
+                    int horas = sc.nextInt();
+
+                    System.out.print("¿Cuál es tu nivel actual? (bajo/medio/alto): ");
+                    String nivel = sc.next().toLowerCase();
+
+                    System.out.print("¿Cuál es la dificultad de la asignatura? (baja/media/alta): ");
+                    String dificultad = sc.next().toLowerCase();
+
+                    System.out.print("¿Qué porcentaje de temario llevas preparado? (0-100): ");
+                    int temario = sc.nextInt();
+
+                    String contenidoMsg = "dias=" + dias + ";horas=" + horas + ";nivel=" + nivel 
+                                            + ";dificultad=" + dificultad + ";temario=" + temario;
+                    
+                    sc.close();
+
                     // Se crea un mensaje ACL de tipo REQUEST para solicitar una recomendacion
                     ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
                     request.addReceiver(recommender);
                     request.setConversationId("study-plan-recommendation");
-                    request.setContent("dias=7;horas=2;nivel=medio;dificultad=alta;temario=40");
+                    request.setContent(contenidoMsg);
 
                     // Se envia la solicitud al agente recomendador
                     send(request);

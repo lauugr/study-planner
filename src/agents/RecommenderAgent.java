@@ -111,27 +111,27 @@ public class RecommenderAgent extends Agent {
             return "No se ha podido generar una recomendación porque no se han recibido datos";
         }
 
-        // Regla 1: si quedan pocos dias o queda mucho temario, se recomienda un plan intensivo
-        if (dias <= 7 || temario < 40) {
+        int horasTotales = dias * horas;
+        int temarioRestante = 100 - temario;
+
+        //Esta casi listo si tiene mucho conocimiento y ademas tiene buen nivel
+        if (temario >= 80 && nivel.equals("alto")){
+            return "Plan recomendado: de mantenimiento";
+        } 
+        //Es urgente si 
+        // 1. Queda menos de una semana y le falta mas del 30% del temario 
+        // 2. Tiene muy pocas horas de estudio y le falta mas de la mitad del temario
+        else if ((dias <= 7 && temarioRestante > 30) || (horasTotales < 15 && temarioRestante > 50)) {
             return "Plan recomendado: intensivo";
         }
-
-        // Regla 2: si el nivel es bajo o la dificultad es alta, se recomienda un plan de refuerzo
-        if (nivel.equals("bajo") || dificultad.equals("alta")) {
-            return "Plan recomendado: de refuerzo";
+        //Necesita reforzar conocimientos si tiene el nivel muy bajo o percibe la asignatura muy dificil
+        else if (nivel.equals("bajo") || dificultad.equals("alta")){
+             return "Plan recomendado: de refuerzo";
         }
-
-        // Regla 3: si el usuario tiene buen nivel y bastante temario preparado, se recomienda mantenimiento
-        if (nivel.equals("alto") && temario >= 75) {
-            return "Plan recomendado: de mantenimiento";
-        }
-
-        // Regla 4: en el resto de casos, se recomienda un plan equilibrado
-        if (horas >= 2) {
+        //El resto de casos un plan equiulibrado
+        else {
             return "Plan recomendado: equilibrado";
         }
-
-        return "Plan recomendado: de refuerzo";
     }
 
     // Extrae un valor entero de una cadena con formato clave=valor
