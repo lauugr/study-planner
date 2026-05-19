@@ -5,9 +5,8 @@ import jade.core.Agent;
 import java.util.Scanner;
 
 import jade.core.AID;
-import jade.core.behaviours.WakerBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
+import jade.core.behaviours.*;
+import jade.lang.acl.*;
 import utils.DFUtils;
 
 // Agente encargado de representar al usuario y solicitar la recomendacion del plan de estudio
@@ -17,10 +16,21 @@ public class UserAgent extends Agent {
         // Se muestra por consola que el agente se ha iniciado correctamente
         System.out.println("UserAgent iniciado: " + getLocalName());
 
-        // Se anade un comportamiento que espera unos segundos antes de buscar el servicio, para dar tiempo a que el resto de agentes se registren en el DF
-        addBehaviour(new WakerBehaviour(this, 2000) {
+        // Se anade un comportamiento 
+        addBehaviour(new SimpleBehaviour(this) {
+            private boolean finalizado = false;
+            private boolean primera = true;
+
+            private Scanner sc = new Scanner(System.in);
+            
             @Override
-            protected void onWake() {
+            public void action() {
+                // la primera vez se espera unos segundos antes de buscar el servicio, para dar tiempo a que el resto de agentes se registren en el DF
+                if (primera){
+                    doWait(2000);
+                    primera = false;
+                }
+
                 // Se busca en el Directory Facilitator un agente que ofrezca el servicio de recomendacion
                 AID[] recommenders = DFUtils.searchService(myAgent, "recommendation-service");
 
@@ -32,9 +42,29 @@ public class UserAgent extends Agent {
                             + recommender.getLocalName());
 
                     //Interaccion con usuario
+                    System.out.println("\n------------------------------");
+                    System.out.println("        MENU PRINCIPAL        ");
+                    System.out.println("------------------------------");
+
+                    System.out.println("¿Generar plan de estudios? (s/n): ");
+                    String inicio = sc.next().toLowerCase();
+
+                    // Comprobar respuesta del usuario
+                    if (inicio.equals("n") || inicio.equals("no")){
+                        System.out.println("Finalizando servicio. Suerte con el estudio :)");
+                        finalizado = true;
+                        return;
+                    } else if (!inicio.equals("s") && !inicio.equals("si") && !inicio.equals("sí")){
+                        System.out.println("Opcion no valida, introduce 's'(sí) o 'n'(no)");
+                        return;
+                    }
+  
                     System.out.println("Bienvenido al Planificador de estudio");
 
-                    Scanner sc = new Scanner(System.in);
+                    System.out.println("\n------------------------------");
+                    System.out.println("         NUEVA CONSULTA       ");
+                    System.out.println("------------------------------");
+
 
                     System.out.print("¿Cuántos días faltan para el examen?: ");
                     int dias = sc.nextInt();
@@ -53,8 +83,6 @@ public class UserAgent extends Agent {
 
                     String contenidoMsg = "dias=" + dias + ";horas=" + horas + ";nivel=" + nivel 
                                             + ";dificultad=" + dificultad + ";temario=" + temario;
-                    
-                    sc.close();
 
                     // Se crea un mensaje ACL de tipo REQUEST para solicitar una recomendacion
                     ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
@@ -82,7 +110,15 @@ public class UserAgent extends Agent {
                 } else {
                     // Si no se encuentra ningun agente con ese servicio, se informa por consola
                     System.out.println("No se ha encontrado ningún servicio recommendation-service");
+                    System.out.println("Buscando servicio recommendation-service");
+                    doWait(1000);
                 }
+            }
+
+            @Override
+            public boolean done(){
+                if(finalizado) sc.close();
+                return finalizado;
             }
         });
     }

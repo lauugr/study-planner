@@ -1,5 +1,9 @@
 package agents;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -8,6 +12,9 @@ import utils.DFUtils;
 
 // Agente encargado de gestionar los datos necesarios para realizar la recomendacion
 public class DataAgent extends Agent {
+
+    private final String RUTA = "reglas_de_estudio.txt";
+
     @Override
     protected void setup() {
         // Se muestra por consola que el agente se ha iniciado correctamente
@@ -38,7 +45,7 @@ public class DataAgent extends Agent {
                         + request.getSender().getLocalName());
 
                     // De momento se devuelven reglas basicas como texto
-                    String rules = "reglas=basicas;planes=intensivo,refuerzo,equilibrado,mantenimiento";
+                    String rules = leerReglas(RUTA);
 
                     // Se crea la respuesta al mensaje recibido
                     ACLMessage response = request.createReply();
@@ -54,5 +61,19 @@ public class DataAgent extends Agent {
                 }
             }
         });
+    }
+
+    // Metodo para leer documento con reglas
+    private String leerReglas(String ruta){
+        StringBuilder reglas = new StringBuilder();
+        File archivo = new File(ruta);
+
+        try (Scanner lector = new Scanner(archivo)){
+            while (lector.hasNextLine()) reglas.append(lector.nextLine());
+            return reglas.toString();
+        } catch (FileNotFoundException e){
+            System.err.println("Archivo no encontrado en la ruta: " + ruta);
+            return "reglas=error;planes=ninguno";
+        }
     }
 }
