@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -37,8 +38,13 @@ public class RecommenderAgent extends Agent {
                     System.out.println("Solicitud recibida de " + request.getSender().getLocalName()
                             + ": " + request.getContent());
 
+                    // Se solicitan al DataAgent los datos o reglas necesarios para realizar la recomendacion
+                    String dataRules = requestDataRules();
+
+                    System.out.println("Datos recibidos del DataAgent: " + dataRules);
+
                     // Se procesa la informacion recibida y se obtiene el plan recomendado
-                    String recommendation = recommendStudyPlan(request.getContent());
+                    String recommendation = recommendStudyPlan(request.getContent(), dataRules);
 
                     // Se crea la respuesta a partir del mensaje recibido
                     ACLMessage response = request.createReply();
@@ -56,14 +62,54 @@ public class RecommenderAgent extends Agent {
         });
     }
 
+    // Solicita al DataAgent los datos necesarios para realizar la recomendacion
+    private String requestDataRules() {
+        // Se busca en el Directory Facilitator un agente que ofrezca el servicio de datos
+        AID[] dataAgents = DFUtils.searchService(this, "data-service");
+
+        if (dataAgents.length == 0) {
+            return "sin-datos";
+        }
+
+        // Se crea un mensaje ACL de tipo REQUEST para solicitar los datos
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        request.addReceiver(dataAgents[0]);
+        request.setConversationId("study-plan-data");
+        request.setContent("solicitud=reglas");
+
+        // Se envia la solicitud al DataAgent
+        send(request);
+        System.out.println("Solicitud de datos enviada al DataAgent");
+
+        // Se crea una plantilla para esperar la respuesta del DataAgent
+        MessageTemplate template = MessageTemplate.and(
+            MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+            MessageTemplate.MatchConversationId("study-plan-data")
+        );
+
+        // Se espera de forma bloqueante a recibir la respuesta del DataAgent
+        ACLMessage response = blockingReceive(template);
+
+        if (response != null) {
+            return response.getContent();
+        }
+
+        return "sin-datos";
+    }
+
     // Calcula una recomendacion sencilla a partir de los datos recibidos
-    private String recommendStudyPlan(String data) {
+    private String recommendStudyPlan(String data, String dataRules) {
         int dias = getIntValue(data, "dias");
         int horas = getIntValue(data, "horas");
         int temario = getIntValue(data, "temario");
 
         String nivel = getStringValue(data, "nivel");
         String dificultad = getStringValue(data, "dificultad");
+
+        // Si el DataAgent no proporciona datos, se informa de que no puede calcularse la recomendacion
+        if (dataRules.equals("sin-datos")) {
+            return "No se ha podido generar una recomendación porque no se han recibido datos";
+        }
 
         // Regla 1: si quedan pocos dias o queda mucho temario, se recomienda un plan intensivo
         if (dias <= 7 || temario < 40) {
