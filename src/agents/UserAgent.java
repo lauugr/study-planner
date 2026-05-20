@@ -25,8 +25,8 @@ public class UserAgent extends Agent {
             
             @Override
             public void action() {
-                // la primera vez se espera unos segundos antes de buscar el servicio, para dar tiempo a que el resto de agentes se registren en el DF
-                if (primera){
+                // La primera vez se espera unos segundos antes de buscar el servicio, para dar tiempo a que el resto de agentes se registren en el DF
+                if (primera) {
                     doWait(2000);
                     primera = false;
                 }
@@ -46,16 +46,11 @@ public class UserAgent extends Agent {
                     System.out.println("        MENU PRINCIPAL        ");
                     System.out.println("------------------------------");
 
-                    System.out.println("¿Generar plan de estudios? (s/n): ");
-                    String inicio = sc.next().toLowerCase();
+                    boolean generarPlan = pedirSiNo(sc, "¿Generar plan de estudios? (s/n): ");
 
-                    // Se comprueba la respuesta del usuario
-                    if (inicio.equals("n") || inicio.equals("no")){
+                    if (!generarPlan) {
                         System.out.println("Finalizando servicio. Suerte con el estudio :)");
                         finalizado = true;
-                        return;
-                    } else if (!inicio.equals("s") && !inicio.equals("si") && !inicio.equals("sí")){
-                        System.out.println("Opcion no valida, introduce 's'(sí) o 'n'(no)");
                         return;
                     }
   
@@ -65,21 +60,13 @@ public class UserAgent extends Agent {
                     System.out.println("         NUEVA CONSULTA       ");
                     System.out.println("------------------------------");
 
-
-                    System.out.print("¿Cuántos días faltan para el examen?: ");
-                    int dias = sc.nextInt();
-
-                    System.out.print("¿Cuántas horas al dia puedes estudiar?: ");
-                    int horas = sc.nextInt();
-
-                    System.out.print("¿Cuál es tu nivel actual? (bajo/medio/alto): ");
-                    String nivel = sc.next().toLowerCase();
-
-                    System.out.print("¿Cuál es la dificultad de la asignatura? (baja/media/alta): ");
-                    String dificultad = sc.next().toLowerCase();
-
-                    System.out.print("¿Qué porcentaje de temario llevas preparado? (0-100): ");
-                    int temario = sc.nextInt();
+                    int dias = pedirEntero(sc, "¿Cuántos días faltan para el examen?: ", 1, 365);
+                    int horas = pedirEntero(sc, "¿Cuántas horas al dia puedes estudiar?: ", 1, 24);
+                    String nivel = pedirOpcion(sc, "¿Cuál es tu nivel actual? (bajo/medio/alto): ",
+                            new String[]{"bajo", "medio", "alto"});
+                    String dificultad = pedirOpcion(sc, "¿Cuál es la dificultad de la asignatura? (baja/media/alta): ",
+                            new String[]{"baja", "media", "alta"});
+                    int temario = pedirEntero(sc, "¿Qué porcentaje de temario llevas preparado? (0-100): ", 0, 100);
 
                     String contenidoMsg = "dias=" + dias + ";horas=" + horas + ";nivel=" + nivel 
                                             + ";dificultad=" + dificultad + ";temario=" + temario;
@@ -116,10 +103,64 @@ public class UserAgent extends Agent {
             }
 
             @Override
-            public boolean done(){
-                if(finalizado) sc.close();
+            public boolean done() {
+                if (finalizado) sc.close();
                 return finalizado;
             }
         });
+    }
+
+    // Solicita al usuario una respuesta afirmativa o negativa y valida la entrada
+    private boolean pedirSiNo(Scanner sc, String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            String respuesta = sc.nextLine().trim().toLowerCase();
+
+            if (respuesta.equals("s") || respuesta.equals("si") || respuesta.equals("sí")) {
+                return true;
+            }
+
+            if (respuesta.equals("n") || respuesta.equals("no")) {
+                return false;
+            }
+
+            System.out.println("Opcion no valida. Introduce 's' para si o 'n' para no.");
+        }
+    }
+
+    // Solicita un numero entero dentro de un rango determinado
+    private int pedirEntero(Scanner sc, String mensaje, int min, int max) {
+        while (true) {
+            System.out.print(mensaje);
+            String entrada = sc.nextLine().trim();
+
+            try {
+                int valor = Integer.parseInt(entrada);
+
+                if (valor >= min && valor <= max) {
+                    return valor;
+                }
+
+                System.out.println("Valor no valido. Introduce un numero entre " + min + " y " + max + ".");
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada no valida. Introduce un numero entero.");
+            }
+        }
+    }
+
+    // Solicita una opcion textual y comprueba que pertenezca al conjunto de opciones permitidas
+    private String pedirOpcion(Scanner sc, String mensaje, String[] opcionesValidas) {
+        while (true) {
+            System.out.print(mensaje);
+            String entrada = sc.nextLine().trim().toLowerCase();
+
+            for (String opcion : opcionesValidas) {
+                if (entrada.equals(opcion)) {
+                    return entrada;
+                }
+            }
+
+            System.out.println("Opcion no valida. Introduce una de las opciones indicadas.");
+        }
     }
 }
