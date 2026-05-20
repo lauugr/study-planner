@@ -1,1 +1,4 @@
-reglas=basicas;planes=intensivo,refuerzo,equilibrado,mantenimiento
+intensivo=50% ejercicios, 30% teoría, 20% simulacros
+refuerzo=40% teoría, 40% ejercicios guiados, 20% repaso
+equilibrado=35% teoría, 45% práctica, 20% simulacros
+mantenimiento=30% repaso, 50% simulacros, 20% puntos débiles

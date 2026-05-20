@@ -63,14 +63,14 @@ public class DataAgent extends Agent {
         });
     }
 
-    // Metodo para leer documento con reglas
+    // Metodo para leer el documento con las reglas de estudio
     private String leerReglas(String ruta){
         StringBuilder reglas = new StringBuilder();
         File archivo = new File(ruta);
 
         try (Scanner lector = new Scanner(archivo)){
-            // Se anade un salto de linea para mantener separadas las reglas leidas del fichero
             while (lector.hasNextLine()) {
+                // Se anade un salto de linea para mantener separadas las reglas leidas del fichero
                 reglas.append(lector.nextLine()).append("\n");
             }
             return reglas.toString();

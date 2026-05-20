@@ -107,31 +107,44 @@ public class RecommenderAgent extends Agent {
         String dificultad = getStringValue(data, "dificultad");
 
         // Si el DataAgent no proporciona datos, se informa de que no puede calcularse la recomendacion
-        if (dataRules.equals("sin-datos")) {
-            return "No se ha podido generar una recomendación porque no se han recibido datos";
+        if (dataRules.equals("sin-datos") || dataRules.contains("reglas=error")) {
+            return "No se ha podido generar una recomendación porque no se han recibido datos válidos";
         }
 
         int horasTotales = dias * horas;
         int temarioRestante = 100 - temario;
 
-        //Esta casi listo si tiene mucho conocimiento y ademas tiene buen nivel
-        if (temario >= 80 && nivel.equals("alto")){
-            return "Plan recomendado: de mantenimiento";
-        } 
-        //Es urgente si 
-        // 1. Queda menos de una semana y le falta mas del 30% del temario 
+        String plan;
+        String motivo;
+
+        // Esta casi listo si tiene mucho conocimiento y ademas tiene buen nivel
+        if (temario >= 80 && nivel.equals("alto")) {
+            plan = "mantenimiento";
+            motivo = "el nivel actual es alto y el porcentaje de temario preparado es elevado.";
+        }
+        // Es urgente si:
+        // 1. Queda menos de una semana y le falta mas del 30% del temario
         // 2. Tiene muy pocas horas de estudio y le falta mas de la mitad del temario
         else if ((dias <= 7 && temarioRestante > 30) || (horasTotales < 15 && temarioRestante > 50)) {
-            return "Plan recomendado: intensivo";
+            plan = "intensivo";
+            motivo = "queda poco tiempo disponible o el porcentaje de temario pendiente es alto.";
         }
-        //Necesita reforzar conocimientos si tiene el nivel muy bajo o percibe la asignatura muy dificil
-        else if (nivel.equals("bajo") || dificultad.equals("alta")){
-             return "Plan recomendado: de refuerzo";
+        // Necesita reforzar conocimientos si tiene el nivel muy bajo o percibe la asignatura muy dificil
+        else if (nivel.equals("bajo") || dificultad.equals("alta")) {
+            plan = "refuerzo";
+            motivo = "el nivel actual o la dificultad percibida de la asignatura requieren reforzar los contenidos.";
         }
-        //El resto de casos un plan equiulibrado
+        // El resto de casos un plan equilibrado
         else {
-            return "Plan recomendado: equilibrado";
+            plan = "equilibrado";
+            motivo = "hay margen suficiente para combinar teoría, práctica y repaso.";
         }
+
+        String distribucion = getDistributionForPlan(dataRules, plan);
+
+        return "Plan recomendado: " + plan
+                + "\nMotivo: " + motivo
+                + "\nDistribución sugerida: " + distribucion;
     }
 
     // Extrae un valor entero de una cadena con formato clave=valor
@@ -156,5 +169,20 @@ public class RecommenderAgent extends Agent {
         }
 
         return "";
+    }
+
+    // Busca en las reglas proporcionadas por el DataAgent la distribucion asociada a un plan
+    private String getDistributionForPlan(String dataRules, String plan) {
+        String[] lines = dataRules.split("\\n");
+
+        for (String line : lines) {
+            String[] pair = line.split("=", 2);
+
+            if (pair.length == 2 && pair[0].trim().equals(plan)) {
+                return pair[1].trim();
+            }
+        }
+
+        return "No se ha encontrado una distribución específica para este plan";
     }
 }
