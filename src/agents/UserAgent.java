@@ -16,7 +16,7 @@ public class UserAgent extends Agent {
         // Se muestra por consola que el agente se ha iniciado correctamente
         System.out.println("UserAgent iniciado: " + getLocalName());
 
-        // Se anade un comportamiento 
+        // Se anade un comportamiento simple para gestionar el menu de consultas del usuario
         addBehaviour(new SimpleBehaviour(this) {
             private boolean finalizado = false;
             private boolean primera = true;
@@ -41,7 +41,7 @@ public class UserAgent extends Agent {
                     System.out.println("Servicio recommendation-service encontrado en: "
                             + recommender.getLocalName());
 
-                    //Interaccion con usuario
+                    // Se interacciona con el usuario
                     System.out.println("\n------------------------------");
                     System.out.println("        MENU PRINCIPAL        ");
                     System.out.println("------------------------------");
@@ -49,7 +49,7 @@ public class UserAgent extends Agent {
                     System.out.println("¿Generar plan de estudios? (s/n): ");
                     String inicio = sc.next().toLowerCase();
 
-                    // Comprobar respuesta del usuario
+                    // Se comprueba la respuesta del usuario
                     if (inicio.equals("n") || inicio.equals("no")){
                         System.out.println("Finalizando servicio. Suerte con el estudio :)");
                         finalizado = true;
@@ -94,7 +94,7 @@ public class UserAgent extends Agent {
                     send(request);
                     System.out.println("Solicitud enviada al agente recomendador");
 
-                    // Se crea una plantilla para esperar unicamente la respuesta a esta conservacion
+                    // Se crea una plantilla para esperar unicamente la respuesta a esta conversacion
                     MessageTemplate template = MessageTemplate.and(
                             MessageTemplate.MatchPerformative(ACLMessage.INFORM),
                             MessageTemplate.MatchConversationId("study-plan-recommendation")

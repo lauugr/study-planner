@@ -13,7 +13,7 @@ import utils.DFUtils;
 // Agente encargado de gestionar los datos necesarios para realizar la recomendacion
 public class DataAgent extends Agent {
 
-    private final String RUTA = "reglas_de_estudio.txt";
+    private final String RUTA = "data/reglas_de_estudio.txt";
 
     @Override
     protected void setup() {
@@ -69,7 +69,10 @@ public class DataAgent extends Agent {
         File archivo = new File(ruta);
 
         try (Scanner lector = new Scanner(archivo)){
-            while (lector.hasNextLine()) reglas.append(lector.nextLine());
+            // Se anade un salto de linea para mantener separadas las reglas leidas del fichero
+            while (lector.hasNextLine()) {
+                reglas.append(lector.nextLine()).append("\n");
+            }
             return reglas.toString();
         } catch (FileNotFoundException e){
             System.err.println("Archivo no encontrado en la ruta: " + ruta);
