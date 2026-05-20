@@ -1,10 +1,8 @@
 package agents;
 
-import jade.core.Agent;
-
 import java.util.Scanner;
 
-import jade.core.AID;
+import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import utils.DFUtils;
@@ -87,12 +85,14 @@ public class UserAgent extends Agent {
                             MessageTemplate.MatchConversationId("study-plan-recommendation")
                     );
 
-                    // Se espera de forma bloqueante a recibir la respuesta del recomendador
-                    ACLMessage response = blockingReceive(template);
+                    // Se espera de forma bloqueante un maximo de 15 segundos a recibir la respuesta del recomendador
+                    ACLMessage response = blockingReceive(template, 15_000);
 
                     // Se muestra la recomendacion recibida
                     if (response != null) {
                         System.out.println("Respuesta recibida del recomendador: " + response.getContent());
+                    } else {
+                        System.out.println("Tiempo de espera agotado, no se ha recivido respuesta del RecommenderAgent a tiempo.");
                     }
                 } else {
                     // Si no se encuentra ningun agente con ese servicio, se informa por consola

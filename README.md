@@ -1,3 +1,14 @@
+# Pasos Previos
+Para poder compilar y ejecutar y compilar este proyecto se necesita:
+- **JDK version 8 o superior**
+- **Libreria JADE** archivo `jade.jar`.
+- **Libreria Commons Codec** archivo `commons-codec-1.3.jar`.
+
+# Instalación
+1. Clonar repositorio.
+2. Asegurar que los archivos .jar se en cuentra en la carpeta `lib/`en el directorio raiz.
+3. Verificar que el archivo de configuracion de reglas existe en la ruta `data/reglas_de_estudio.txt`.
+
 # Ejecución
 Carpeta `study-planner`:
 - `rm -rf bin`

@@ -1,10 +1,8 @@
 package agents;
 
-import jade.core.AID;
-import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
+import jade.core.*;
+import jade.core.behaviours.*;
+import jade.lang.acl.*;
 import utils.DFUtils;
 
 // Agente encargado de procesar la informacion recibida y generar la recomendacion del plan de estudio
@@ -87,13 +85,14 @@ public class RecommenderAgent extends Agent {
             MessageTemplate.MatchConversationId("study-plan-data")
         );
 
-        // Se espera de forma bloqueante a recibir la respuesta del DataAgent
-        ACLMessage response = blockingReceive(template);
+        // Se espera de forma bloqueante un maximo de 10 segundos a recibir la respuesta del DataAgent
+        ACLMessage response = blockingReceive(template, 10_000);
 
         if (response != null) {
             return response.getContent();
         }
 
+        System.out.println("Tiempo de espera agotado, no se ha recivido respuesta del DataAgent a tiempo.");
         return "sin-datos";
     }
 

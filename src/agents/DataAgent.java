@@ -1,13 +1,11 @@
 package agents;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.*;
 import utils.DFUtils;
 
 // Agente encargado de gestionar los datos necesarios para realizar la recomendacion
