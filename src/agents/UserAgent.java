@@ -80,4 +80,13 @@ public class UserAgent extends Agent {
             }
         });
     }
+
+    @Override
+    public void doActivate(){
+        super.doActivate();
+
+        System.out.println("UserAgent reactivado: " + getLocalName());
+
+        if (interfaz != null) interfaz.setVisible(true);
+    }
 }
