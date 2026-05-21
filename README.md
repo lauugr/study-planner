@@ -13,7 +13,7 @@ Para poder compilar y ejecutar y compilar este proyecto se necesita:
 Carpeta `study-planner`:
 - `rm -rf bin`
 - Para compilar desde terminal `javac -cp "lib/*" -d bin src/agents/*.java src/utils/*.java` 
-- Para ejecutar JADE: `java -cp "bin:lib/*" jade.Boot -gui "data:agents.DataAgent;recommender:agents.RecommenderAgent;user:agents.UserAgent"`
+- Para ejecutar JADE: `java -cp "bin:lib/*" jade.Boot -gui "data:agents.DataAgent;recommender:agents.RecommenderAgent;user:agents.UserAgent"` (en caso de warning (Java 17): `java --add-opens java.base/java.lang=ALL-UNNAMED -cp "bin:lib/*" jade.Boot -gui "data:agents.DataAgent;recommender:agents.RecommenderAgent;user:agents.UserAgent"`)
 
 
 # Casos de prueba

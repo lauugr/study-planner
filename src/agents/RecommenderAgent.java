@@ -5,6 +5,12 @@ import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import utils.DFUtils;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.trees.J48;
+import weka.core.DenseInstance;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
+
 // Agente encargado de procesar la informacion recibida y generar la recomendacion del plan de estudio
 public class RecommenderAgent extends Agent {
     @Override
@@ -36,12 +42,12 @@ public class RecommenderAgent extends Agent {
                     System.out.println("Solicitud recibida de " + request.getSender().getLocalName()
                             + ": " + request.getContent());
 
-                    // Se solicitan al DataAgent los datos o reglas necesarios para realizar la recomendacion
+                    // Se solicitan al DataAgent los datos necesarios para realizar la recomendacion
                     String dataRules = requestDataRules();
 
                     System.out.println("Datos recibidos del DataAgent: " + dataRules);
 
-                    // Se procesa la informacion recibida y se obtiene el plan recomendado
+                    // Se procesa la informacion recibida y se obtiene el plan recomendado mediante Weka
                     String recommendation = recommendStudyPlan(request.getContent(), dataRules);
 
                     // Se crea la respuesta a partir del mensaje recibido
@@ -92,58 +98,102 @@ public class RecommenderAgent extends Agent {
             return response.getContent();
         }
 
-        System.out.println("Tiempo de espera agotado, no se ha recivido respuesta del DataAgent a tiempo.");
+        System.out.println("Tiempo de espera agotado, no se ha recibido respuesta del DataAgent a tiempo.");
         return "sin-datos";
     }
 
-    // Calcula una recomendacion sencilla a partir de los datos recibidos
+    // Calcula una recomendacion aplicando clasificacion supervisada con Weka
     private String recommendStudyPlan(String data, String dataRules) {
-        int dias = getIntValue(data, "dias");
-        int horas = getIntValue(data, "horas");
-        int temario = getIntValue(data, "temario");
-
-        String nivel = getStringValue(data, "nivel");
-        String dificultad = getStringValue(data, "dificultad");
-
         // Si el DataAgent no proporciona datos, se informa de que no puede calcularse la recomendacion
         if (dataRules.equals("sin-datos") || dataRules.contains("reglas=error")) {
-            return "No se ha podido generar una recomendación porque no se han recibido datos válidos";
+            return "No se ha podido generar una recomendación porque no se han recibido datos válidos.";
         }
 
-        int horasTotales = dias * horas;
-        int temarioRestante = 100 - temario;
+        String datasetPath = getValueFromExternalData(dataRules, "dataset");
 
-        String plan;
-        String motivo;
-
-        // Esta casi listo si tiene mucho conocimiento y ademas tiene buen nivel
-        if (temario >= 80 && nivel.equals("alto")) {
-            plan = "mantenimiento";
-            motivo = "el nivel actual es alto y el porcentaje de temario preparado es elevado.";
-        }
-        // Es urgente si:
-        // 1. Queda menos de una semana y le falta mas del 30% del temario
-        // 2. Tiene muy pocas horas de estudio y le falta mas de la mitad del temario
-        else if ((dias <= 7 && temarioRestante > 30) || (horasTotales < 15 && temarioRestante > 50)) {
-            plan = "intensivo";
-            motivo = "queda poco tiempo disponible o el porcentaje de temario pendiente es alto.";
-        }
-        // Necesita reforzar conocimientos si tiene el nivel muy bajo o percibe la asignatura muy dificil
-        else if (nivel.equals("bajo") || dificultad.equals("alta")) {
-            plan = "refuerzo";
-            motivo = "el nivel actual o la dificultad percibida de la asignatura requieren reforzar los contenidos.";
-        }
-        // El resto de casos un plan equilibrado
-        else {
-            plan = "equilibrado";
-            motivo = "hay margen suficiente para combinar teoría, práctica y repaso.";
+        if (datasetPath.equals("")) {
+            return "No se ha podido generar una recomendación porque no se ha encontrado el dataset";
         }
 
-        String distribucion = getDistributionForPlan(dataRules, plan);
+        try {
+            // Se clasifica la situacion del usuario mediante el algoritmo J48 de Weka
+            String plan = classifyStudyPlan(data, datasetPath);
 
-        return "Plan recomendado: " + plan
-                + "\nMotivo: " + motivo
-                + "\nDistribución sugerida: " + distribucion;
+            // Se obtiene la distribucion asociada al plan recomendado desde las reglas externas
+            String distribucion = getDistributionForPlan(dataRules, plan);
+
+            return "Plan recomendado: " + plan
+                    + "\nTécnica aplicada: clasificación supervisada con Weka (J48)"
+                    + "\nDistribución sugerida: " + distribucion;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "No se ha podido generar una recomendación por un error durante la clasificación";
+        }
+    }
+
+    // Clasifica los datos introducidos por el usuario usando un modelo J48 de Weka
+    private String classifyStudyPlan(String data, String datasetPath) throws Exception {
+        // Se carga el dataset externo proporcionado por el DataAgent
+        DataSource source = new DataSource(datasetPath);
+        Instances dataset = source.getDataSet();
+
+        // Se indica que la clase a predecir es el ultimo atributo: plan
+        if (dataset.classIndex() == -1) {
+            dataset.setClassIndex(dataset.numAttributes() - 1);
+        }
+
+        // Se crea y entrena el clasificador J48 con los ejemplos del dataset
+        Classifier classifier = new J48();
+        classifier.buildClassifier(dataset);
+
+        // Se crea una nueva instancia con los datos introducidos por el usuario
+        DenseInstance instance = new DenseInstance(dataset.numAttributes());
+        instance.setDataset(dataset);
+
+        instance.setValue(dataset.attribute("dias"), getIntValue(data, "dias"));
+        instance.setValue(dataset.attribute("horas"), getIntValue(data, "horas"));
+        instance.setValue(dataset.attribute("nivel"), getStringValue(data, "nivel"));
+        instance.setValue(dataset.attribute("dificultad"), getStringValue(data, "dificultad"));
+        instance.setValue(dataset.attribute("temario"), getIntValue(data, "temario"));
+
+        // La clase plan queda sin asignar porque es lo que se quiere predecir
+        instance.setMissing(dataset.classAttribute());
+
+        // Se clasifica la instancia y se obtiene el nombre del plan predicho
+        double prediction = classifier.classifyInstance(instance);
+
+        return dataset.classAttribute().value((int) prediction);
+    }
+
+    // Extrae un valor de los datos externos proporcionados por el DataAgent
+    private String getValueFromExternalData(String dataRules, String key) {
+        String[] lines = dataRules.split("\\n");
+
+        for (String line : lines) {
+            String[] pair = line.split("=", 2);
+
+            if (pair.length == 2 && pair[0].trim().equals(key)) {
+                return pair[1].trim();
+            }
+        }
+
+        return "";
+    }
+
+    // Busca en las reglas proporcionadas por el DataAgent la distribucion asociada a un plan
+    private String getDistributionForPlan(String dataRules, String plan) {
+        String[] lines = dataRules.split("\\n");
+
+        for (String line : lines) {
+            String[] pair = line.split("=", 2);
+
+            if (pair.length == 2 && pair[0].trim().equals(plan)) {
+                return pair[1].trim();
+            }
+        }
+
+        return "No se ha encontrado una distribución específica para este plan";
     }
 
     // Extrae un valor entero de una cadena con formato clave=valor
@@ -168,20 +218,5 @@ public class RecommenderAgent extends Agent {
         }
 
         return "";
-    }
-
-    // Busca en las reglas proporcionadas por el DataAgent la distribucion asociada a un plan
-    private String getDistributionForPlan(String dataRules, String plan) {
-        String[] lines = dataRules.split("\\n");
-
-        for (String line : lines) {
-            String[] pair = line.split("=", 2);
-
-            if (pair.length == 2 && pair[0].trim().equals(plan)) {
-                return pair[1].trim();
-            }
-        }
-
-        return "No se ha encontrado una distribución específica para este plan";
     }
 }

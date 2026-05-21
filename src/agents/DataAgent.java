@@ -11,7 +11,8 @@ import utils.DFUtils;
 // Agente encargado de gestionar los datos necesarios para realizar la recomendacion
 public class DataAgent extends Agent {
 
-    private final String RUTA = "data/reglas_de_estudio.txt";
+    private static final String RUTA_REGLAS = "data/reglas_de_estudio.txt";
+    private static final String RUTA_DATASET = "data/study_plans.arff";
 
     @Override
     protected void setup() {
@@ -42,8 +43,8 @@ public class DataAgent extends Agent {
                     System.out.println("Solicitud de datos recibida de "
                         + request.getSender().getLocalName());
 
-                    // De momento se devuelven reglas basicas como texto
-                    String rules = leerReglas(RUTA);
+                    // Se devuelve la ruta del dataset externo y las reglas de distribucion de estudio
+                    String rules = "dataset=" + RUTA_DATASET + "\n" + leerReglas(RUTA_REGLAS);
 
                     // Se crea la respuesta al mensaje recibido
                     ACLMessage response = request.createReply();

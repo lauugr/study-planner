@@ -1,0 +1,26 @@
+@relation study_plans
+
+@attribute dias numeric
+@attribute horas numeric
+@attribute nivel {bajo,medio,alto}
+@attribute dificultad {baja,media,alta}
+@attribute temario numeric
+@attribute plan {intensivo,refuerzo,equilibrado,mantenimiento}
+
+@data
+3,1,bajo,alta,20,intensivo
+5,2,medio,alta,40,intensivo
+7,2,medio,media,50,intensivo
+6,1,bajo,media,45,intensivo
+10,1,bajo,alta,50,refuerzo
+12,2,bajo,media,60,refuerzo
+15,2,medio,alta,65,refuerzo
+20,1,bajo,baja,70,refuerzo
+12,3,medio,media,60,equilibrado
+15,3,medio,media,70,equilibrado
+18,2,medio,baja,65,equilibrado
+20,3,alto,media,70,equilibrado
+20,2,alto,baja,85,mantenimiento
+25,2,alto,baja,90,mantenimiento
+30,1,alto,media,80,mantenimiento
+15,4,alto,baja,85,mantenimiento
