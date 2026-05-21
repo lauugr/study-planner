@@ -1,6 +1,5 @@
 package agents;
 
-
 import javax.swing.SwingUtilities;
 
 import jade.core.*;
@@ -11,9 +10,9 @@ import utils.DFUtils;
 // Agente encargado de representar al usuario y solicitar la recomendacion del plan de estudio
 public class UserAgent extends Agent {
 
-    //Interfaz de usuario
+    // Interfaz de usuario
     private UserAgentInterfaz interfaz;
- 
+
     @Override
     protected void setup() {
         // Se muestra por consola que el agente se ha iniciado correctamente
@@ -25,13 +24,14 @@ public class UserAgent extends Agent {
         });
     }
 
-    public void solicitarRecomendacion(String contenidoMsg){
+    public void solicitarRecomendacion(String contenidoMsg) {
         addBehaviour(new SimpleBehaviour(this) {
             @Override
             public void action() {
                 interfaz.mostarEstado("Buscando servicio recommendation-service...");
 
-                // Se busca en el Directory Facilitator un agente que ofrezca el servicio de recomendacion
+                // Se busca en el Directory Facilitator un agente que ofrezca el servicio de
+                // recomendacion
                 AID[] recommenders = DFUtils.searchService(myAgent, "recommendation-service");
 
                 // Si se encuentra algun agente recomendador, se muestra su nombre por consola
@@ -51,13 +51,14 @@ public class UserAgent extends Agent {
                     send(request);
                     System.out.println("Solicitud enviada al agente recomendador");
 
-                    // Se crea una plantilla para esperar unicamente la respuesta a esta conversacion
+                    // Se crea una plantilla para esperar unicamente la respuesta a esta
+                    // conversacion
                     MessageTemplate template = MessageTemplate.and(
                             MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-                            MessageTemplate.MatchConversationId("study-plan-recommendation")
-                    );
+                            MessageTemplate.MatchConversationId("study-plan-recommendation"));
 
-                    // Se espera de forma bloqueante un maximo de 15 segundos a recibir la respuesta del recomendador
+                    // Se espera de forma bloqueante un maximo de 15 segundos a recibir la respuesta
+                    // del recomendador
                     ACLMessage response = blockingReceive(template, 15_000);
 
                     // Se muestra la recomendacion recibida
@@ -67,26 +68,29 @@ public class UserAgent extends Agent {
                         System.out.println("Respuesta recibida del recomendador: " + response.getContent());
                     } else {
                         interfaz.mostarEstado("Error: Tiempo de espera agotado.");
-                        interfaz.mostrarRespuesta("Tiempo de espera agotado, no se ha recibido respuesta del RecommenderAgent a tiempo.");
+                        interfaz.mostrarRespuesta(
+                                "Tiempo de espera agotado, no se ha recibido respuesta del RecommenderAgent a tiempo.");
                     }
                 } else {
                     interfaz.mostarEstado("Error: Tiempo de espera agotado.");
-                    interfaz.mostrarRespuesta("No se ha encontrado ningún servicio recommendation-service. Intentelo de nuevo más tarde");
+                    interfaz.mostrarRespuesta(
+                            "No se ha encontrado ningún servicio recommendation-service. Intentelo de nuevo más tarde");
                 }
             }
 
-            public boolean done(){
+            public boolean done() {
                 return true;
             }
         });
     }
 
     @Override
-    public void doActivate(){
+    public void doActivate() {
         super.doActivate();
 
         System.out.println("UserAgent reactivado: " + getLocalName());
 
-        if (interfaz != null) interfaz.setVisible(true);
+        if (interfaz != null)
+            interfaz.setVisible(true);
     }
 }
