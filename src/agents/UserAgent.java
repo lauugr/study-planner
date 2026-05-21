@@ -92,7 +92,7 @@ public class UserAgent extends Agent {
                     if (response != null) {
                         System.out.println("Respuesta recibida del recomendador: " + response.getContent());
                     } else {
-                        System.out.println("Tiempo de espera agotado, no se ha recivido respuesta del RecommenderAgent a tiempo.");
+                        System.out.println("Tiempo de espera agotado, no se ha recibido respuesta del RecommenderAgent a tiempo.");
                     }
                 } else {
                     // Si no se encuentra ningun agente con ese servicio, se informa por consola
