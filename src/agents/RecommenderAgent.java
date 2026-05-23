@@ -18,12 +18,12 @@ public class RecommenderAgent extends Agent {
         // Se muestra por consola que el agente se ha iniciado correctamente
         System.out.println("RecommenderAgent iniciado: " + getLocalName());
 
-        // Se registra en el Directory Facilitator el servicio de recomendacion ofrecido por este agente
+        // Se registra en el Directory Facilitator el servicio de recomendacion ofrecido
+        // por este agente
         DFUtils.registerService(
-            this,
-            "recommendation-service",
-            "Servicio de recomendación de planes de estudio"
-        );
+                this,
+                "recommendation-service",
+                "Servicio de recomendación de planes de estudio");
 
         // Se anade un comportamiento ciclico para atender solicitudes de recomendacion
         addBehaviour(new CyclicBehaviour() {
@@ -32,8 +32,7 @@ public class RecommenderAgent extends Agent {
                 // Se define una plantilla para recibir solo mensajes REQUEST de recomendacion
                 MessageTemplate template = MessageTemplate.and(
                         MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-                        MessageTemplate.MatchConversationId("study-plan-recommendation")
-                );
+                        MessageTemplate.MatchConversationId("study-plan-recommendation"));
 
                 // Se intenta recibir un mensaje que cumpla la plantilla
                 ACLMessage request = receive(template);
@@ -47,7 +46,8 @@ public class RecommenderAgent extends Agent {
 
                     System.out.println("Datos recibidos del DataAgent: " + dataRules);
 
-                    // Se procesa la informacion recibida y se obtiene el plan recomendado mediante Weka
+                    // Se procesa la informacion recibida y se obtiene el plan recomendado mediante
+                    // Weka
                     String recommendation = recommendStudyPlan(request.getContent(), dataRules);
 
                     // Se crea la respuesta a partir del mensaje recibido
@@ -68,7 +68,8 @@ public class RecommenderAgent extends Agent {
 
     // Solicita al DataAgent los datos necesarios para realizar la recomendacion
     private String requestDataRules() {
-        // Se busca en el Directory Facilitator un agente que ofrezca el servicio de datos
+        // Se busca en el Directory Facilitator un agente que ofrezca el servicio de
+        // datos
         AID[] dataAgents = DFUtils.searchService(this, "data-service");
 
         if (dataAgents.length == 0) {
@@ -87,11 +88,11 @@ public class RecommenderAgent extends Agent {
 
         // Se crea una plantilla para esperar la respuesta del DataAgent
         MessageTemplate template = MessageTemplate.and(
-            MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-            MessageTemplate.MatchConversationId("study-plan-data")
-        );
+                MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                MessageTemplate.MatchConversationId("study-plan-data"));
 
-        // Se espera de forma bloqueante un maximo de 10 segundos a recibir la respuesta del DataAgent
+        // Se espera de forma bloqueante un maximo de 10 segundos a recibir la respuesta
+        // del DataAgent
         ACLMessage response = blockingReceive(template, 10_000);
 
         if (response != null) {
@@ -104,7 +105,8 @@ public class RecommenderAgent extends Agent {
 
     // Calcula una recomendacion aplicando clasificacion supervisada con Weka
     private String recommendStudyPlan(String data, String dataRules) {
-        // Si el DataAgent no proporciona datos, se informa de que no puede calcularse la recomendacion
+        // Si el DataAgent no proporciona datos, se informa de que no puede calcularse
+        // la recomendacion
         if (dataRules.equals("sin-datos") || dataRules.contains("reglas=error")) {
             return "No se ha podido generar una recomendación porque no se han recibido datos válidos.";
         }
@@ -119,7 +121,8 @@ public class RecommenderAgent extends Agent {
             // Se clasifica la situacion del usuario mediante el algoritmo J48 de Weka
             String plan = classifyStudyPlan(data, datasetPath);
 
-            // Se obtiene la distribucion asociada al plan recomendado desde las reglas externas
+            // Se obtiene la distribucion asociada al plan recomendado desde las reglas
+            // externas
             String distribucion = getDistributionForPlan(dataRules, plan);
 
             return "Plan recomendado: " + plan
@@ -181,7 +184,8 @@ public class RecommenderAgent extends Agent {
         return "";
     }
 
-    // Busca en las reglas proporcionadas por el DataAgent la distribucion asociada a un plan
+    // Busca en las reglas proporcionadas por el DataAgent la distribucion asociada
+    // a un plan
     private String getDistributionForPlan(String dataRules, String plan) {
         String[] lines = dataRules.split("\\n");
 

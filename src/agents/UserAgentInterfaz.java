@@ -5,13 +5,13 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-//Clase encargada de la interfaz de usuario
+// Clase encargada de la interfaz de usuario
 public class UserAgentInterfaz extends JFrame {
 
     // Agente encargado
     private UserAgent miAgente;
 
-    // Componetes en la interfaz
+    // Componentes en la interfaz
     private JSpinner panelDias;
     private JSpinner panelHoras;
     private JComboBox<String> panelNivel;
@@ -19,22 +19,23 @@ public class UserAgentInterfaz extends JFrame {
     private JSpinner panelEstudiado;
     private JTextArea txtResultado;
     private JLabel estadoActual;
+    private JButton btnGenerar;
 
     public UserAgentInterfaz(UserAgent agente) {
-        // super("Interfaz de usuario - " + agente.getLocalName());
+        super("Planificador de estudio");
         this.miAgente = agente;
 
         // Ventana emergente
         setSize(500, 500);
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         setResizable(false);
 
-        // Si se cierra la venta el agente se suspende
+        // Si el usuario cierra la ventana, se finaliza el agente de interfaz
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                miAgente.doSuspend();
+                miAgente.doDelete();
             }
         });
 
@@ -66,13 +67,14 @@ public class UserAgentInterfaz extends JFrame {
 
         add(panel, BorderLayout.NORTH);
 
-        // Boton para ejecucion
+        // Boton para la ejecucion
         JPanel panelBotones = new JPanel();
-        JButton btnGenerar = new JButton("Generar Plan de Estudio");
-        // Modificar tamaño Boton¿?
+        btnGenerar = new JButton("Generar plan de estudio");
         btnGenerar.addActionListener(e -> {
+            btnGenerar.setEnabled(false); // Se desactiva el boton para evitar solicitudes simultaneas
+
             txtResultado.setText("");
-            mostarEstado("Procesando datos");
+            mostrarEstado("Procesando datos");
 
             // Extraer datos
             int dias = (int) panelDias.getValue();
@@ -81,8 +83,7 @@ public class UserAgentInterfaz extends JFrame {
             String dificultad = (String) panelDificultad.getSelectedItem();
             int temario = (int) panelEstudiado.getValue();
 
-            // Contruir mensaje y enviar
-
+            // Construir mensaje y enviar
             String contenidoMsg = "dias=" + dias + ";horas=" + horas + ";nivel=" + nivel
                     + ";dificultad=" + dificultad + ";temario=" + temario;
             miAgente.solicitarRecomendacion(contenidoMsg);
@@ -106,9 +107,12 @@ public class UserAgentInterfaz extends JFrame {
         panelResultados.add(paneltxt, BorderLayout.CENTER);
 
         add(panelResultados, BorderLayout.SOUTH);
+
+        // Se centra la ventana en la pantalla al abrir la interfaz
+        setLocationRelativeTo(null);
     }
 
-    public void mostarEstado(String estado) {
+    public void mostrarEstado(String estado) {
         SwingUtilities.invokeLater(() -> {
             estadoActual.setText("Estado: " + estado);
         });
@@ -117,6 +121,7 @@ public class UserAgentInterfaz extends JFrame {
     public void mostrarRespuesta(String content) {
         SwingUtilities.invokeLater(() -> {
             txtResultado.setText(content);
+            btnGenerar.setEnabled(true);
         });
     }
 }

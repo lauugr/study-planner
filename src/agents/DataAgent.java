@@ -19,31 +19,32 @@ public class DataAgent extends Agent {
         // Se muestra por consola que el agente se ha iniciado correctamente
         System.out.println("DataAgent iniciado: " + getLocalName());
 
-        // Se registra en el Directory Facilitator el servicio de datos ofrecido por este agente
+        // Se registra en el Directory Facilitator el servicio de datos ofrecido por
+        // este agente
         DFUtils.registerService(
-            this,
-            "data-service",
-            "Servicio de datos para planes de estudio"
-        );
+                this,
+                "data-service",
+                "Servicio de datos para planes de estudio");
 
         // Se anade un comportamiento ciclico para atender solicitudes de datos
         addBehaviour(new CyclicBehaviour() {
             @Override
             public void action() {
-                // Se define una plantilla para recibir solo mensajes REQUEST relacionados con datos
+                // Se define una plantilla para recibir solo mensajes REQUEST relacionados con
+                // datos
                 MessageTemplate template = MessageTemplate.and(
-                    MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-                    MessageTemplate.MatchConversationId("study-plan-data")
-                );
+                        MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+                        MessageTemplate.MatchConversationId("study-plan-data"));
 
                 // Se intenta recibir un mensaje que cumpla la plantilla
                 ACLMessage request = receive(template);
 
                 if (request != null) {
                     System.out.println("Solicitud de datos recibida de "
-                        + request.getSender().getLocalName());
+                            + request.getSender().getLocalName());
 
-                    // Se devuelve la ruta del dataset externo y las reglas de distribucion de estudio
+                    // Se devuelve la ruta del dataset externo y las reglas de distribucion de
+                    // estudio
                     String rules = "dataset=" + RUTA_DATASET + "\n" + leerReglas(RUTA_REGLAS);
 
                     // Se crea la respuesta al mensaje recibido
@@ -63,17 +64,18 @@ public class DataAgent extends Agent {
     }
 
     // Metodo para leer el documento con las reglas de estudio
-    private String leerReglas(String ruta){
+    private String leerReglas(String ruta) {
         StringBuilder reglas = new StringBuilder();
         File archivo = new File(ruta);
 
-        try (Scanner lector = new Scanner(archivo)){
+        try (Scanner lector = new Scanner(archivo)) {
             while (lector.hasNextLine()) {
-                // Se anade un salto de linea para mantener separadas las reglas leidas del fichero
+                // Se anade un salto de linea para mantener separadas las reglas leidas del
+                // fichero
                 reglas.append(lector.nextLine()).append("\n");
             }
             return reglas.toString();
-        } catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             System.err.println("Archivo no encontrado en la ruta: " + ruta);
             return "reglas=error;planes=ninguno";
         }

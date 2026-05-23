@@ -28,7 +28,7 @@ public class UserAgent extends Agent {
         addBehaviour(new SimpleBehaviour(this) {
             @Override
             public void action() {
-                interfaz.mostarEstado("Buscando servicio recommendation-service...");
+                interfaz.mostrarEstado("Buscando servicio recommendation-service...");
 
                 // Se busca en el Directory Facilitator un agente que ofrezca el servicio de
                 // recomendacion
@@ -37,7 +37,7 @@ public class UserAgent extends Agent {
                 // Si se encuentra algun agente recomendador, se muestra su nombre por consola
                 if (recommenders.length > 0) {
                     AID recommender = recommenders[0];
-                    interfaz.mostarEstado("Servicio recommendation-service encontrado, enviado solicitud...");
+                    interfaz.mostrarEstado("Servicio recommendation-service encontrado, enviando solicitud...");
                     System.out.println("Servicio recommendation-service encontrado en: "
                             + recommender.getLocalName());
 
@@ -63,34 +63,25 @@ public class UserAgent extends Agent {
 
                     // Se muestra la recomendacion recibida
                     if (response != null) {
-                        interfaz.mostarEstado("Analisis completado.");
+                        interfaz.mostrarEstado("Análisis completado.");
                         interfaz.mostrarRespuesta(response.getContent());
                         System.out.println("Respuesta recibida del recomendador: " + response.getContent());
                     } else {
-                        interfaz.mostarEstado("Error: Tiempo de espera agotado.");
+                        interfaz.mostrarEstado("Error: Tiempo de espera agotado.");
                         interfaz.mostrarRespuesta(
                                 "Tiempo de espera agotado, no se ha recibido respuesta del RecommenderAgent a tiempo.");
                     }
                 } else {
-                    interfaz.mostarEstado("Error: Tiempo de espera agotado.");
+                    interfaz.mostrarEstado("Error: Servicio no encontrado.");
                     interfaz.mostrarRespuesta(
-                            "No se ha encontrado ningún servicio recommendation-service. Intentelo de nuevo más tarde");
+                            "No se ha encontrado ningún servicio recommendation-service. Inténtelo de nuevo más tarde.");
                 }
             }
 
+            @Override
             public boolean done() {
                 return true;
             }
         });
-    }
-
-    @Override
-    public void doActivate() {
-        super.doActivate();
-
-        System.out.println("UserAgent reactivado: " + getLocalName());
-
-        if (interfaz != null)
-            interfaz.setVisible(true);
     }
 }
