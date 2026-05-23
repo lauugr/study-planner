@@ -52,7 +52,7 @@ El flujo principal de comunicación es el siguiente:
 8. El `RecommenderAgent` devuelve al `UserAgent` un mensaje `INFORM` con el plan recomendado.
 9. El `UserAgent` muestra la recomendación en la interfaz gráfica.
 
-![alt text](DiagramaFlujo.png)
+![alt text](DiagramaSniffer.png)
 
 Los agentes utilizan el Directory Facilitator de JADE para registrar y localizar servicios. Además, se emplean plantillas `MessageTemplate` para filtrar los mensajes recibidos y llamadas bloqueantes con `blockingReceive` para esperar respuestas concretas.
 
