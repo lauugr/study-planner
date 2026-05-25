@@ -1,24 +1,24 @@
 # Sistema multiagente de ayuda en la planificación del estudio
 
 ## 1. Descripción del sistema
-Este proyecto implementa un sistema multiagente desarrollado con JADE cuyo objetivo es recomendar un plan de estudio personalizado a partir de la situación indicada por el usuario. Para ello, el sistema recoge datos como los días restantes hasta el examen, las horas disponibles de estudio al día, el nivel actual de conocimiento, la dificultad percibida de la asignatura y el porcentaje de temario ya preparado.
+Este proyecto implementa un sistema multiagente desarrollado con JADE cuyo objetivo es recomendar un plan de estudio personalizado a partir de la situación indicada por el usuario. Para ello, recoge datos como los días restantes hasta el examen, las horas disponibles de estudio al día, el nivel actual de conocimiento, la dificultad percibida de la asignatura y el porcentaje de temario ya preparado.
 
-A partir de esta información, el sistema genera una recomendación entre distintos tipos de planes de estudio: intensivo, de refuerzo, equilibrado o de mantenimiento. Además, se muestra una distribución orientativa del estudio asociada al plan recomendado.
+A partir de esta información, genera una recomendación entre distintos tipos de planes de estudio: intensivo, de refuerzo, equilibrado o de mantenimiento. Además, muestra una distribución orientativa del estudio asociada al plan recomendado.
 
-El sistema aplica una técnica de clasificación supervisada mediante Weka. En concreto, el agente recomendador utiliza un clasificador J48 entrenado con un conjunto de datos externo en formato ARFF, que contiene ejemplos de situaciones de estudio y el tipo de plan asociado.
+El sistema aplica una técnica de clasificación supervisada mediante Weka. En concreto, el agente recomendador utiliza un clasificador J48 entrenado con un conjunto de datos externo en formato ARFF, que contiene ejemplos de situaciones de estudio etiquetados con el tipo de plan que debe recomendarse.
 
 ## 2. Arquitectura del sistema multiagente
 El sistema está compuesto por tres agentes principales:
 
 ### 2.1 UserAgent
-El `UserAgent` representa al usuario dentro del sistema. Es el encargado de crear y gestionar la interfaz gráfica, recoger los datos introducidos por el usuario y enviar una solicitud de recomendación al agente recomendador.
+El `UserAgent` representa al usuario dentro del sistema. Es el encargado de crear y gestionar la interfaz gráfica, recoger los datos introducidos en ella y enviar una solicitud de recomendación al agente recomendador.
 
 La interfaz permite introducir los valores necesarios para generar la recomendación y muestra tanto el estado del proceso como el resultado obtenido.
 
 ### 2.2 DataAgent
 El `DataAgent` actúa como agente de adquisición de información. Su función consiste en proporcionar al sistema los datos externos necesarios para realizar la recomendación.
 
-Este agente lee el fichero `data/reglas_de_estudio.txt`, que contiene las distribuciones sugeridas para cada tipo de plan, y proporciona también la ruta del conjunto de datos `data/study_plans.arff`, utilizado por el agente recomendador para entrenar el clasificador.
+Este agente lee el fichero `data/reglas_de_estudio.txt`, que contiene las distribuciones sugeridas para cada tipo de plan, y envía también la ruta del conjunto de datos `data/study_plans.arff`, utilizado por el agente recomendador para entrenar el clasificador.
 
 ### 2.3 RecommenderAgent
 El `RecommenderAgent` es el agente encargado del procesamiento inteligente. Recibe la información del usuario, solicita al `DataAgent` los datos necesarios y aplica un clasificador J48 de Weka para determinar el tipo de plan de estudio recomendado.
@@ -52,6 +52,7 @@ El flujo principal de comunicación es el siguiente:
 8. El `RecommenderAgent` devuelve al `UserAgent` un mensaje `INFORM` con el plan recomendado.
 9. El `UserAgent` muestra la recomendación en la interfaz gráfica.
 
+La siguiente imagen muestra el intercambio de mensajes capturado con la herramienta Sniffer de JADE:
 ![alt text](DiagramaSniffer.png)
 
 Los agentes utilizan el Directory Facilitator de JADE para registrar y localizar servicios. Además, se emplean plantillas `MessageTemplate` para filtrar los mensajes recibidos y llamadas bloqueantes con `blockingReceive` para esperar respuestas concretas.
@@ -61,6 +62,8 @@ La estructura principal del proyecto es la siguiente:
 
 ```
 study-planner/
+├── .vscode/
+│   └── settings.json
 ├── data/
 │   ├── reglas_de_estudio.txt
 │   └── study_plans.arff
@@ -76,6 +79,10 @@ study-planner/
 │   │   └── UserAgentInterfaz.java
 │   └── utils/
 │       └── DFUtils.java
+├── APDescription.txt
+├── DiagramaSniffer.png
+├── MTPs-Main-Container.txt
+├── .gitignore
 └── README.md
 ````
 
@@ -83,6 +90,9 @@ study-planner/
 - `src/utils/`: contiene utilidades comunes para registrar y buscar servicios en el Directory Facilitator
 - `data/`: contiene los ficheros externos utilizados por el sistema.
 - `lib/`: contiene las bibliotecas externas necesarias para ejecutar el proyecto.
+- `.vscode/`: contiene la configuración utilizada para reconocer las librerías externas en Visual Studio Code.
+- `APDescription.txt` y `MTPs-Main-Container.txt`: contienen información generada por JADE sobre la plataforma y el contenedor principal.
+- `DiagramaSniffer.png`: contiene una captura del intercambio de mensajes entre agentes obtenida con la herramienta Sniffer de JADE.
 
 ## 6. Requisitos e instalación
 Para ejecutar el proyecto es necesario disponer de:
@@ -280,4 +290,4 @@ Al cerrar la ventana principal de la interfaz gráfica, se finaliza el agente de
 ## 11. Declaración de uso de IA
 Durante el desarrollo de la práctica se ha utilizado inteligencia artificial como apoyo para la planificación del sistema, la revisión de la arquitectura multiagente, la depuración de errores y la mejora de comentarios.
 
-El código final ha sido revisado, adaptado y probado por los miembros del grupo. Las decisiones de diseño, la integración de JADE, la comunicación entre agentes, el uso de Weka y la validación del funcionamiento del sistema han sido realizadas por el grupo.
+El código final ha sido revisado, adaptado y probado por los miembros del grupo. Asimismo, sus integrantes han definido las decisiones de diseño, la integración de JADE, la comunicación entre agentes, el uso de Weka y la validación del funcionamiento del sistema.
