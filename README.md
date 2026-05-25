@@ -18,7 +18,7 @@ La interfaz permite introducir los valores necesarios para generar la recomendac
 ### 2.2 DataAgent
 El `DataAgent` actúa como agente de adquisición de información. Su función consiste en proporcionar al sistema los datos externos necesarios para realizar la recomendación.
 
-Este agente lee el fichero `data/reglas_de_estudio.txt`, que contiene las distribuciones sugeridas para cada tipo de plan, y envía también la ruta del conjunto de datos `data/study_plans.arff`, utilizado por el agente recomendador para entrenar el clasificador.
+Este agente lee el fichero `data/reglas_de_estudio.txt`, que contiene las distribuciones sugeridas para cada tipo de plan, y envía también al `RecommenderAgent` la ruta del conjunto de datos `data/study_plans.arff`, utilizado para entrenar el clasificador.
 
 ### 2.3 RecommenderAgent
 El `RecommenderAgent` es el agente encargado del procesamiento inteligente. Recibe la información del usuario, solicita al `DataAgent` los datos necesarios y aplica un clasificador J48 de Weka para determinar el tipo de plan de estudio recomendado.
@@ -53,7 +53,7 @@ El flujo principal de comunicación es el siguiente:
 9. El `UserAgent` muestra la recomendación en la interfaz gráfica.
 
 La siguiente imagen muestra el intercambio de mensajes capturado con la herramienta Sniffer de JADE:
-![alt text](DiagramaSniffer.png)
+![Intercambio de mensajes entre agentes capturado con Sniffer](DiagramaSniffer.png)
 
 Los agentes utilizan el Directory Facilitator de JADE para registrar y localizar servicios. Además, se emplean plantillas `MessageTemplate` para filtrar los mensajes recibidos y llamadas bloqueantes con `blockingReceive` para esperar respuestas concretas.
 
@@ -84,7 +84,7 @@ study-planner/
 ├── MTPs-Main-Container.txt
 ├── .gitignore
 └── README.md
-````
+```
 
 - `src/agents/`: contiene los agentes JADE y la interfaz gráfica del sistema
 - `src/utils/`: contiene utilidades comunes para registrar y buscar servicios en el Directory Facilitator
